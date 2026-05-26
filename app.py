@@ -86,20 +86,23 @@ if uploaded_file and api_key:
     
     with st.spinner("AI is evaluating the peak spice level..."):
         prompt = f"""
-        You are a strict, literal literary analyst. Rate the sexual content ("spice level") of the text sample using this 1-5 scale.
+        You are a strict, literal literary analyst. Rate the sexual content ("spice level") of the text sample using this 0-5 scale.
 
-        1 Pepper: Sweet/Clean. Kissing, holding hands, romantic tension. ZERO sexual acts.
+        0 Peppers: No Romance. The text contains zero romantic plotlines, zero romantic tension, and zero physical intimacy. This is for non-romance genres (sci-fi, thriller, nonfiction, etc.).
+        1 Pepper: Sweet/Clean Romance. Kissing, holding hands, romantic tension, or sweet closed-door moments. ZERO sexual acts.
         2 Peppers: Closed Door. Heavy kissing, making out, or suggestive dialogue. The scene cuts away before sex occurs. 
         3 Peppers: Gentle Open Door. A physical sexual act occurs on-page, but descriptions are vague and focus on emotion.
         4 Peppers: Explicit Open Door. Detailed, explicit descriptions of physical sexual acts on-page.
         5 Peppers: Smut. Highly graphic, prolonged explicit sex.
 
-        STEP 1: You must first determine if a physical sexual act actually occurs on the page. 
-        STEP 2: If NO physical sexual act occurs, the rating MUST be a 1 or 2. It is mathematically impossible to score a 3, 4, or 5 without an on-page sexual act.
+        ABSOLUTE RULES (Read Carefully):
+        - If the book lacks a romantic subplot entirely, it MUST be a 0.
+        - "Implied" sex, "sexual tension", or "suggestive dialogue" automatically limits the maximum score to a 1 or 2.
+        - You CANNOT rate a 3, 4, or 5 unless the characters are actively and physically performing a sexual act ON THE PAGE in the provided text.
 
         Provide your response in this EXACT format:
         ON-PAGE SEX ACT: [Answer YES or NO]
-        RATING: [Number of peppers, e.g., 1 Pepper]
+        RATING: [Number of peppers, e.g., 0 Peppers]
         REASON: [1-2 sentences justifying your rating based strictly on the text.]
 
         Here is the text to analyze:
