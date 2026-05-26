@@ -86,26 +86,24 @@ if uploaded_file and api_key:
     
     with st.spinner("AI is evaluating the peak spice level..."):
         prompt = f"""
-        You are an expert literary analyst specializing in content ratings. 
-        Analyze the following text samples from a novel and rate its sexual content ("spice level") strictly based on this 1-5 scale:
+        You are a strict, literal literary analyst. Rate the sexual content ("spice level") of the text sample using this 1-5 scale.
 
-        1 Pepper (Sweet / Fade to Black): Zero to minimal sexual content. Focuses heavily on relationships, holding hands, or sweet, "closed-door" moments where the action cuts away.
-        2 Peppers (Closed Door): The story hints at physical attraction, but explicit acts remain off-page. The door closes before anything graphic occurs.
-        3 Peppers (Gentle Open Door): The "Novice" level. The reader is present for intimate scenes, and specific body parts or actions are described, but the focus remains on the romantic connection rather than heavy explicit detail.
-        4 Peppers (Explicit Open Door): Multiple explicit intimate scenes. Authors use detailed language and describe a variety of acts.
-        5 Peppers (Smut/Explicit): Highly graphic, detailed sexual content throughout the novel. The narrative often centers heavily on the physical intimacy.
+        1 Pepper: Sweet/Clean. Kissing, holding hands, romantic tension. ZERO sexual acts.
+        2 Peppers: Closed Door. Heavy kissing, making out, or suggestive dialogue. The scene cuts away before sex occurs. 
+        3 Peppers: Gentle Open Door. A sexual act occurs on-page, but descriptions are vague and focus on emotion.
+        4 Peppers: Explicit Open Door. Detailed, explicit descriptions of sexual acts on-page.
+        5 Peppers: Smut. Highly graphic, prolonged explicit sex.
 
-        CRITICAL INSTRUCTIONS & GUARDRAILS:
-        1. Rate based on the HIGHEST tier of spice found, BUT you must verify that an actual physical act is occurring on the page.
-        2. DO NOT over-rate based on dialogue, jokes, or character thoughts. Characters talking or thinking about sex does NOT qualify for a Level 3, 4, or 5.
-        3. Heavy kissing, making out, or intense sexual tension where clothes stay on and explicit acts do not occur must remain a Level 1 or 2.
-        4. To score a 3, 4, or 5, the text MUST describe the characters actively engaging in an on-page sexual act.
+        ABSOLUTE RULES (Read Carefully):
+        - "Implied" sex, "sexual tension", or "suggestive dialogue" automatically limits the maximum score to a 1 or 2.
+        - You CANNOT rate a 3, 4, or 5 unless the characters are actively and physically performing a sexual act ON THE PAGE in the provided text.
+        - Do NOT rate based on what you think happens after the scene ends.
 
-        Provide your response in this exact format:
-        RATING: [Number of peppers, e.g., 3 Peppers]
-        REASON: [A 2-3 sentence explanation of why you gave this rating based on the text provided, without quoting explicit words directly]
+        Provide your response in this EXACT format:
+        RATING: [Number of peppers, e.g., 1 Pepper]
+        REASON: [1-2 sentences. Explicitly state whether a physical act occurred on-page or if it was just dialogue/tension, and justify your rating.]
 
-        Here are the text samples from the middle and end of the book:
+        Here is the text to analyze:
         {text_sample}
         """
         
