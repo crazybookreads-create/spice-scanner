@@ -106,7 +106,7 @@ if uploaded_file and api_key:
         {text_sample}
         """
         
-       response = client.chat.completions.create(
+        response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": prompt}]
         )
