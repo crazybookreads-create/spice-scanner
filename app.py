@@ -106,17 +106,28 @@ if uploaded_file and api_key:
         {text_sample}
         """
         
-        response = client.chat.completions.create(
+       response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": prompt}]
         )
         
-        result = response.choices[0].message.content
+        # Grab the raw response from the AI
+        raw_result = response.choices[0].message.content
+        
+        # --- NEW: The Output Filter ---
+        # Split the AI's response into separate lines
+        lines = raw_result.split('\n')
+        
+        # Create a clean list that ONLY keeps lines starting with RATING or REASON
+        clean_lines = [line.strip() for line in lines if line.startswith("RATING:") or line.startswith("REASON:")]
+        
+        # Stitch those clean lines back together with a nice double line-break
+        final_result = "<br><br>".join(clean_lines)
         
         # Custom Highlighted Results Box
         st.markdown("<br><hr>", unsafe_allow_html=True)
         st.markdown(f"""
             <div style='background-color: rgba(255, 75, 75, 0.05); border-left: 5px solid #ff4b4b; padding: 20px; border-radius: 5px;'>
-                <span style='font-size: 1.1rem; line-height: 1.6;'>{result}</span>
+                <span style='font-size: 1.1rem; line-height: 1.6;'>{final_result}</span>
             </div>
         """, unsafe_allow_html=True)
