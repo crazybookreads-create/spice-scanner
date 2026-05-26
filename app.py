@@ -69,15 +69,26 @@ if uploaded_file and api_key:
     
     with st.spinner("Reading the book... This might take a moment."):
         raw_text = extract_text_from_epub(uploaded_file)
-        sample_size = 50000  
-        text_sample = raw_text[len(raw_text)//3 : (len(raw_text)//3) + sample_size]
+        
+        # --- NEW: Multi-Chunk Sampling Strategy ---
+        length = len(raw_text)
+        chunk_size = 25000  # We will take 25k characters from 3 different spots
+        
+        # Grab text from the 50%, 75%, and 85% marks of the book
+        chunk1 = raw_text[length//2 : (length//2) + chunk_size]
+        chunk2 = raw_text[int(length * 0.75) : int(length * 0.75) + chunk_size]
+        chunk3 = raw_text[int(length * 0.85) : int(length * 0.85) + chunk_size]
+        
+        # Stitch them together into one giant text sample for the AI
+        text_sample = chunk1 + "\n\n...[TEXT SKIPPED]...\n\n" + chunk2 + "\n\n...[TEXT SKIPPED]...\n\n" + chunk3
         
     st.success("Book successfully read! Analyzing content...")
     
-    with st.spinner("AI is evaluating the spice level..."):
+    with st.spinner("AI is evaluating the peak spice level..."):
+        # --- NEW: Upgraded "Peak" Prompt ---
         prompt = f"""
         You are an expert literary analyst specializing in content ratings. 
-        Analyze the following text sample from a novel and rate its sexual content ("spice level") strictly based on this 1-5 scale:
+        Analyze the following text samples from a novel and rate its sexual content ("spice level") strictly based on this 1-5 scale:
 
         1 Pepper (Sweet / Fade to Black): Zero to minimal sexual content. Focuses heavily on relationships, holding hands, or sweet, "closed-door" moments where the action cuts away.
         2 Peppers (Closed Door): The story hints at physical attraction, but explicit acts remain off-page. The door closes before anything graphic occurs.
@@ -85,11 +96,13 @@ if uploaded_file and api_key:
         4 Peppers (Explicit Open Door): Multiple explicit intimate scenes. Authors use detailed language and describe a variety of acts.
         5 Peppers (Smut/Explicit): Highly graphic, detailed sexual content throughout the novel. The narrative often centers heavily on the physical intimacy.
 
+        CRITICAL INSTRUCTION: You must rate the book based on the HIGHEST tier of spice found anywhere in the sample. If 95% of the text is sweet banter, but there is one highly explicit 4-Pepper scene, your final rating MUST be 4 Peppers. Do not average the rating down.
+
         Provide your response in this exact format:
         RATING: [Number of peppers, e.g., 3 Peppers]
         REASON: [A 2-3 sentence explanation of why you gave this rating based on the text provided, without quoting explicit words directly]
 
-        Here is the text to analyze:
+        Here are the text samples from the middle and end of the book:
         {text_sample}
         """
         
@@ -100,7 +113,7 @@ if uploaded_file and api_key:
         
         result = response.choices[0].message.content
         
-        # --- NEW: Custom Highlighted Results Box without icons/titles ---
+        # Custom Highlighted Results Box
         st.markdown("<br><hr>", unsafe_allow_html=True)
         st.markdown(f"""
             <div style='background-color: rgba(255, 75, 75, 0.05); border-left: 5px solid #ff4b4b; padding: 20px; border-radius: 5px;'>
