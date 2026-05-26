@@ -84,8 +84,7 @@ if uploaded_file and api_key:
         
     st.success("Book successfully read! Analyzing content...")
     
-    with st.spinner("AI is evaluating the peak spice level..."):
-        # --- NEW: Upgraded "Peak" Prompt ---
+   with st.spinner("AI is evaluating the peak spice level..."):
         prompt = f"""
         You are an expert literary analyst specializing in content ratings. 
         Analyze the following text samples from a novel and rate its sexual content ("spice level") strictly based on this 1-5 scale:
@@ -96,7 +95,11 @@ if uploaded_file and api_key:
         4 Peppers (Explicit Open Door): Multiple explicit intimate scenes. Authors use detailed language and describe a variety of acts.
         5 Peppers (Smut/Explicit): Highly graphic, detailed sexual content throughout the novel. The narrative often centers heavily on the physical intimacy.
 
-        CRITICAL INSTRUCTION: You must rate the book based on the HIGHEST tier of spice found anywhere in the sample. If 95% of the text is sweet banter, but there is one highly explicit 4-Pepper scene, your final rating MUST be 4 Peppers. Do not average the rating down.
+        CRITICAL INSTRUCTIONS & GUARDRAILS:
+        1. Rate based on the HIGHEST tier of spice found, BUT you must verify that an actual physical act is occurring on the page.
+        2. DO NOT over-rate based on dialogue, jokes, or character thoughts. Characters talking or thinking about sex does NOT qualify for a Level 3, 4, or 5.
+        3. Heavy kissing, making out, or intense sexual tension where clothes stay on and explicit acts do not occur must remain a Level 1 or 2.
+        4. To score a 3, 4, or 5, the text MUST describe the characters actively engaging in an on-page sexual act.
 
         Provide your response in this exact format:
         RATING: [Number of peppers, e.g., 3 Peppers]
@@ -104,8 +107,7 @@ if uploaded_file and api_key:
 
         Here are the text samples from the middle and end of the book:
         {text_sample}
-        """
-        
+        """        
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": prompt}]
