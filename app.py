@@ -84,7 +84,7 @@ if uploaded_file and api_key:
         
     st.success("Book successfully read! Analyzing content...")
     
-   with st.spinner("AI is evaluating the peak spice level..."):
+    with st.spinner("AI is evaluating the peak spice level..."):
         prompt = f"""
         You are an expert literary analyst specializing in content ratings. 
         Analyze the following text samples from a novel and rate its sexual content ("spice level") strictly based on this 1-5 scale:
@@ -107,7 +107,8 @@ if uploaded_file and api_key:
 
         Here are the text samples from the middle and end of the book:
         {text_sample}
-        """        
+        """
+        
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": prompt}]
