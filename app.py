@@ -90,18 +90,17 @@ if uploaded_file and api_key:
 
         1 Pepper: Sweet/Clean. Kissing, holding hands, romantic tension. ZERO sexual acts.
         2 Peppers: Closed Door. Heavy kissing, making out, or suggestive dialogue. The scene cuts away before sex occurs. 
-        3 Peppers: Gentle Open Door. A sexual act occurs on-page, but descriptions are vague and focus on emotion.
-        4 Peppers: Explicit Open Door. Detailed, explicit descriptions of sexual acts on-page.
+        3 Peppers: Gentle Open Door. A physical sexual act occurs on-page, but descriptions are vague and focus on emotion.
+        4 Peppers: Explicit Open Door. Detailed, explicit descriptions of physical sexual acts on-page.
         5 Peppers: Smut. Highly graphic, prolonged explicit sex.
 
-        ABSOLUTE RULES (Read Carefully):
-        - "Implied" sex, "sexual tension", or "suggestive dialogue" automatically limits the maximum score to a 1 or 2.
-        - You CANNOT rate a 3, 4, or 5 unless the characters are actively and physically performing a sexual act ON THE PAGE in the provided text.
-        - Do NOT rate based on what you think happens after the scene ends.
+        STEP 1: You must first determine if a physical sexual act actually occurs on the page. 
+        STEP 2: If NO physical sexual act occurs, the rating MUST be a 1 or 2. It is mathematically impossible to score a 3, 4, or 5 without an on-page sexual act.
 
         Provide your response in this EXACT format:
+        ON-PAGE SEX ACT: [Answer YES or NO]
         RATING: [Number of peppers, e.g., 1 Pepper]
-        REASON: [1-2 sentences. Explicitly state whether a physical act occurred on-page or if it was just dialogue/tension, and justify your rating.]
+        REASON: [1-2 sentences justifying your rating based strictly on the text.]
 
         Here is the text to analyze:
         {text_sample}
