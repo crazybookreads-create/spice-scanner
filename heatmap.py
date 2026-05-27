@@ -87,37 +87,40 @@ if uploaded_file and api_key:
     with st.spinner("Reading the book and generating a heat map... This might take a moment."):
         chapters = extract_chapters_from_epub(uploaded_file)
         
-        # --- NEW: Heatmap Scoring & Extraction Logic ---
         # 1. Score every chapter in the book
         scored_chapters = [(score_chapter(chap), chap) for chap in chapters]
         
         # 2. Sort the chapters from highest score to lowest score
         scored_chapters.sort(key=lambda x: x[0], reverse=True)
         
-        # 3. Grab the top 3 highest-scoring chapters. 
-        # Cap each at 25,000 characters so we never exceed your 75,000 total limit.
-        top_chunks = [chap[:25000] for score, chap in scored_chapters[:3]]
+        # --- NEW: We specifically label the chunks so the AI can count them ---
+        top_chunks = []
+        for i, (score, chap) in enumerate(scored_chapters[:3]):
+            chunk_text = f"--- CHAPTER EXCERPT {i+1} ---\n{chap[:25000]}"
+            top_chunks.append(chunk_text)
         
-        # 4. Stitch them together into one text sample
-        text_sample = "\n\n...[TEXT SKIPPED]...\n\n".join(top_chunks)
+        # 4. Stitch them together
+        text_sample = "\n\n".join(top_chunks)
         
     st.success("Heat map complete! Hottest chapters identified. Analyzing content...")
     
     with st.spinner("AI is evaluating the peak spice level..."):
+        # --- MODIFIED: Adjusted Prompt Rules for Levels 3, 4, and 5 ---
         prompt = f"""
         You are a strict, literal literary analyst. Rate the sexual content ("spice level") of the text sample using this 0-5 scale.
 
         0 Peppers: No Romance. The text contains zero romantic plotlines, zero romantic tension, and zero physical intimacy. This is for non-romance genres (sci-fi, thriller, nonfiction, etc.).
         1 Pepper: Sweet/Clean Romance. Kissing, holding hands, romantic tension, or sweet closed-door moments. ZERO sexual acts.
         2 Peppers: Closed Door. Heavy kissing, making out, or suggestive dialogue. The scene cuts away before sex occurs. 
-        3 Peppers: Gentle Open Door. A physical sexual act occurs on-page, but descriptions are vague and focus on emotion.
-        4 Peppers: Explicit Open Door. Detailed, explicit descriptions of physical sexual acts on-page.
-        5 Peppers: Smut. Highly graphic, prolonged explicit sex.
+        3 Peppers: Gentle Open Door. A physical sexual act occurs on-page, but descriptions are vague OR explicit acts occur in 2 or fewer chapters.
+        4 Peppers: Explicit Open Door. Detailed, explicit descriptions of physical sexual acts on-page. MUST occur in >2 chapters (i.e., explicit scenes must be present in all 3 provided excerpts).
+        5 Peppers: Smut. Highly graphic, prolonged explicit sex. MUST occur in >2 chapters (i.e., explicit scenes must be present in all 3 provided excerpts).
 
         ABSOLUTE RULES (Read Carefully):
         - If the book lacks a romantic subplot entirely, it MUST be a 0.
         - "Implied" sex, "sexual tension", or "suggestive dialogue" automatically limits the maximum score to a 1 or 2.
         - You CANNOT rate a 3, 4, or 5 unless the characters are actively and physically performing a sexual act ON THE PAGE in the provided text.
+        - To award a 4 or 5, you MUST verify that explicit sexual acts happen in more than 2 chapters. Since you are provided exactly 3 chapter excerpts, this means ALL THREE excerpts must contain on-page sex acts. If only 1 or 2 excerpts contain sex acts, the MAXIMUM rating you can give is a 3.
 
         Provide your response in this EXACT format:
         ON-PAGE SEX ACT: [Answer YES or NO]
