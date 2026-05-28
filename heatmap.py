@@ -140,10 +140,13 @@ if uploaded_file and api_key:
         # Grab the raw response from the AI
         raw_result = response.choices[0].message.content
         
-        # --- MODIFIED: The Output Filter to show the Excerpt breakdown ---
+        # --- MODIFIED: The Output Filter (Hiding the AI's "Dialog") ---
         lines = raw_result.split('\n')
-        # We now keep lines starting with EXCERPT, RATING, or REASON
-        clean_lines = [line.strip() for line in lines if line.startswith(("EXCERPT", "RATING", "REASON"))]
+        
+        # We only keep lines starting with RATING or REASON for the UI
+        clean_lines = [line.strip() for line in lines if line.startswith(("RATING", "REASON"))]
+        
+        # Stitch those clean lines back together
         final_result = "<br><br>".join(clean_lines)
         
         # Custom Highlighted Results Box
