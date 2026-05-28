@@ -105,25 +105,26 @@ if uploaded_file and api_key:
     st.success("Heat map complete! Hottest chapters identified. Analyzing content...")
     
     with st.spinner("AI is evaluating the peak spice level..."):
-        # --- MODIFIED: Adjusted Prompt Rules for Levels 3, 4, and 5 ---
+        # --- MODIFIED: Forced Chain-of-Thought Prompt ---
         prompt = f"""
         You are a strict, literal literary analyst. Rate the sexual content ("spice level") of the text sample using this 0-5 scale.
 
         0 Peppers: No Romance. The text contains zero romantic plotlines, zero romantic tension, and zero physical intimacy. This is for non-romance genres (sci-fi, thriller, nonfiction, etc.).
         1 Pepper: Sweet/Clean Romance. Kissing, holding hands, romantic tension, or sweet closed-door moments. ZERO sexual acts.
         2 Peppers: Closed Door. Heavy kissing, making out, or suggestive dialogue. The scene cuts away before sex occurs. 
-        3 Peppers: Gentle Open Door. A physical sexual act occurs on-page, but descriptions are vague OR explicit acts occur in 2 or fewer chapters.
-        4 Peppers: Explicit Open Door. Detailed, explicit descriptions of physical sexual acts on-page. MUST occur in >2 chapters (i.e., explicit scenes must be present in all 3 provided excerpts).
-        5 Peppers: Smut. Highly graphic, prolonged explicit sex. MUST occur in >2 chapters (i.e., explicit scenes must be present in all 3 provided excerpts).
+        3 Peppers: Gentle Open Door. A physical sexual act occurs on-page, but descriptions are vague OR highly explicit acts occur in 2 or fewer excerpts.
+        4 Peppers: Explicit Open Door. Detailed, explicit descriptions of physical sexual acts on-page.
+        5 Peppers: Smut. Highly graphic, prolonged explicit sex.
 
-        ABSOLUTE RULES (Read Carefully):
-        - If the book lacks a romantic subplot entirely, it MUST be a 0.
-        - "Implied" sex, "sexual tension", or "suggestive dialogue" automatically limits the maximum score to a 1 or 2.
-        - You CANNOT rate a 3, 4, or 5 unless the characters are actively and physically performing a sexual act ON THE PAGE in the provided text.
-        - To award a 4 or 5, you MUST verify that explicit sexual acts happen in more than 2 chapters. Since you are provided exactly 3 chapter excerpts, this means ALL THREE excerpts must contain on-page sex acts. If only 1 or 2 excerpts contain sex acts, the MAXIMUM rating you can give is a 3.
+        ABSOLUTE RULES FOR RATINGS 4 AND 5 (Read Carefully):
+        - STEP 1: Evaluate each Excerpt individually. Does it contain a physical, on-page sexual act?
+        - STEP 2: Count them. If the total number of 'YES' answers is 1 or 2, your FINAL RATING CANNOT exceed 3 Peppers, no matter how graphic or smutty the text is. 
+        - STEP 3: You can ONLY award 4 or 5 Peppers if EXCERPT 1, EXCERPT 2, AND EXCERPT 3 ALL evaluate to YES.
 
         Provide your response in this EXACT format:
-        ON-PAGE SEX ACT: [Answer YES or NO]
+        EXCERPT 1 EXPLICIT: [YES or NO]
+        EXCERPT 2 EXPLICIT: [YES or NO]
+        EXCERPT 3 EXPLICIT: [YES or NO]
         RATING: [Number of peppers, e.g., 0 Peppers]
         REASON: [1-2 sentences justifying your rating based strictly on the text.]
 
@@ -139,9 +140,10 @@ if uploaded_file and api_key:
         # Grab the raw response from the AI
         raw_result = response.choices[0].message.content
         
-        # The Output Filter
+        # --- MODIFIED: The Output Filter to show the Excerpt breakdown ---
         lines = raw_result.split('\n')
-        clean_lines = [line.strip() for line in lines if line.startswith("RATING:") or line.startswith("REASON:")]
+        # We now keep lines starting with EXCERPT, RATING, or REASON
+        clean_lines = [line.strip() for line in lines if line.startswith(("EXCERPT", "RATING", "REASON"))]
         final_result = "<br><br>".join(clean_lines)
         
         # Custom Highlighted Results Box
