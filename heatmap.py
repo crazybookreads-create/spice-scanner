@@ -45,9 +45,11 @@ uploaded_file = st.file_uploader(
 # --- NEW: Keyword List and Scoring Function ---
 spice_keywords = [
     "gasp", "moan", "groan", "shiver", "pulse", "ache", "breath", "panting", 
-    "skin", "taste", "lips", "tongue", "bare", "naked", "hips", "thighs", 
-    "breast", "chest", "neck", "tangled", "core", "center", "slick", "wet", 
-    "hard", "thrust", "peak", "climax", "release", "shatter"
+    "taste", "lips", "tongue", "bare", "naked", "hips", "thighs", "breast", 
+    "chest", "neck", "tangled", "core", "center", "slick", "wet", "hard", "thrust",
+    "peak", "climax", "release", "shatter", "nipple", "cock", "pussy", "orgasm",
+    "cunt", "clit", "arousal", "folds", "bundle of nerves"
+
 ]
 
 def score_chapter(chapter_text):
