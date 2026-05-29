@@ -42,23 +42,34 @@ uploaded_file = st.file_uploader(
     accept_multiple_files=False
 )
 
-# --- NEW: Keyword List and Scoring Function ---
-spice_keywords = [
-    "gasp", "moan", "groan", "shiver", "pulse", "ache", "breath", "panting", 
-    "taste", "lips", "tongue", "bare", "naked", "hips", "thighs", "breast", 
-    "chest", "neck", "tangled", "core", "center", "slick", "wet", "hard", "thrust",
-    "peak", "climax", "release", "shatter", "nipple", "cock", "pussy", "orgasm",
-    "cunt", "clit", "arousal", "folds", "bundle of nerves"
-
-]
+# --- OPTIMIZED WEIGHTED DICTIONARY (Based on Library Audit) ---
+spice_keywords = {
+    # Level 1: Tension & Multi-use words (1 point)
+    "gasp": 1, "moan": 1, "groan": 1, "shiver": 1, "pulse": 1, "ache": 1, 
+    "breath": 1, "panting": 1, "taste": 1, 
+    "hard": 1, "wet": 1, "center": 1, "release": 1, "length": 1, # Demoted to prevent false positives
+    
+    # Level 2: Physical (3 points)
+    "lips": 3, "tongue": 3, "bare": 3, "naked": 3, "hips": 3, "thighs": 3, 
+    "breast": 3, "chest": 3, "neck": 3, "tangled": 3, 
+    
+    # Level 3: Explicit / High-Signal (10 points)
+    "core": 10, "slick": 10, "thrust": 10, "climax": 10, "shatter": 10,
+    "clit": 10, "cock": 10, "dick": 10, "erection": 10,
+    "thrusting": 10, "stroking": 10, "grinding": 10, "penetrating": 10,
+    "folds": 10, "throbbing": 10, "swollen": 10, "apex": 10, "sheath": 10,
+    "nub": 10, "bud": 10, "member": 10, "shaft": 10, "girth": 10
+}
 
 def score_chapter(chapter_text):
     text_lower = chapter_text.lower()
     score = 0
-    for word in spice_keywords:
-        # regex \b ensures we only match whole words (e.g., "hard", not "hardly")
+    # We now loop through both the word AND its weight
+    for word, weight in spice_keywords.items():
+        # regex \b ensures we only match whole words
         matches = len(re.findall(r'\b' + word + r'\b', text_lower))
-        score += matches
+        # Multiply the number of times it was found by its weight
+        score += (matches * weight) 
     return score
 
 # --- MODIFIED: Extracts a LIST of chapters instead of one giant string ---
@@ -95,9 +106,9 @@ if uploaded_file and api_key:
         # 2. Sort the chapters from highest score to lowest score
         scored_chapters.sort(key=lambda x: x[0], reverse=True)
         
-        # --- NEW: We specifically label the chunks so the AI can count them ---
+        # --- UPGRADED: Grabbing the top 4 hottest chapters ---
         top_chunks = []
-        for i, (score, chap) in enumerate(scored_chapters[:3]):
+        for i, (score, chap) in enumerate(scored_chapters[:4]):
             chunk_text = f"--- CHAPTER EXCERPT {i+1} ---\n{chap[:25000]}"
             top_chunks.append(chunk_text)
         
@@ -107,26 +118,29 @@ if uploaded_file and api_key:
     st.success("Heat map complete! Hottest chapters identified. Analyzing content...")
     
     with st.spinner("AI is evaluating the peak spice level..."):
-        # --- MODIFIED: Forced Chain-of-Thought Prompt ---
+        # --- UPGRADED: Adjusted Prompt Rules for 4 Excerpts ---
         prompt = f"""
         You are a strict, literal literary analyst. Rate the sexual content ("spice level") of the text sample using this 0-5 scale.
 
         0 Peppers: No Romance. The text contains zero romantic plotlines, zero romantic tension, and zero physical intimacy. This is for non-romance genres (sci-fi, thriller, nonfiction, etc.).
         1 Pepper: Sweet/Clean Romance. Kissing, holding hands, romantic tension, or sweet closed-door moments. ZERO sexual acts.
         2 Peppers: Closed Door. Heavy kissing, making out, or suggestive dialogue. The scene cuts away before sex occurs. 
-        3 Peppers: Gentle Open Door. A physical sexual act occurs on-page, but descriptions are vague OR highly explicit acts occur in 2 or fewer excerpts.
-        4 Peppers: Explicit Open Door. Detailed, explicit descriptions of physical sexual acts on-page.
-        5 Peppers: Smut. Highly graphic, prolonged explicit sex.
+        3 Peppers: Gentle Open Door. The 'Novice' level. The reader is present for intimate scenes, and specific body parts or actions are described, but the focus remains on the romantic connection. RATE AS 3 IF EXPLICIT ACTS APPEAR IN ONLY 1 OR 2 EXCERPTS.
+        4 Peppers: Explicit Open Door. Multiple explicit intimate scenes. Authors use detailed language and describe a variety of acts. EXPLICIT ACTS MUST APPEAR IN AT LEAST 3 EXCERPTS to qualify for this rating.
+        5 Peppers: Smut / Explicit. Highly graphic, detailed sexual content throughout the novel. The narrative often centers heavily on the physical intimacy. EXPLICIT ACTS MUST APPEAR IN AT LEAST 3 EXCERPTS to qualify for this rating.
 
-        ABSOLUTE RULES FOR RATINGS 4 AND 5 (Read Carefully):
-        - STEP 1: Evaluate each Excerpt individually. Does it contain a physical, on-page sexual act?
-        - STEP 2: Count them. If the total number of 'YES' answers is 1 or 2, your FINAL RATING CANNOT exceed 3 Peppers, no matter how graphic or smutty the text is. 
-        - STEP 3: You can ONLY award 4 or 5 Peppers if EXCERPT 1, EXCERPT 2, AND EXCERPT 3 ALL evaluate to YES.
+        ABSOLUTE RULES (Read Carefully):
+        - STEP 1 (Frequency Check): Evaluate each Excerpt individually. Does it contain a physical, on-page sexual act?
+        - STEP 2 (The Cap): Count your 'YES' answers. If you have 0, 1, or 2 'YES' answers, you are strictly forbidden from giving a 4 or 5 rating. Your FINAL RATING MUST BE 3 OR LOWER. 
+        - STEP 3 (The Focus Check): You can ONLY award a 4 or 5 if AT LEAST 3 excerpts evaluate to YES (i.e., 3 or 4 YES answers). 
+           * If you have 3 or 4 YES answers, and the overarching plot still carries significant weight alongside the detail, rate it a 4.
+           * If you have 3 or 4 YES answers, and the narrative overwhelmingly centers on physical intimacy rather than plot, rate it a 5.
 
         Provide your response in this EXACT format:
         EXCERPT 1 EXPLICIT: [YES or NO]
         EXCERPT 2 EXPLICIT: [YES or NO]
         EXCERPT 3 EXPLICIT: [YES or NO]
+        EXCERPT 4 EXPLICIT: [YES or NO]
         RATING: [Number of peppers, e.g., 0 Peppers]
         REASON: [1-2 sentences justifying your rating based strictly on the text.]
 
@@ -142,7 +156,7 @@ if uploaded_file and api_key:
         # Grab the raw response from the AI
         raw_result = response.choices[0].message.content
         
-        # --- MODIFIED: The Output Filter (Hiding the AI's "Dialog") ---
+        # The Output Filter (Hiding the AI's "Dialog")
         lines = raw_result.split('\n')
         
         # We only keep lines starting with RATING or REASON for the UI
